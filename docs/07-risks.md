@@ -73,7 +73,10 @@ ENVIRONMENT.md says fails on GB10, while the working build used `OFF` with compu
 script now passes the recorded flags ([09](09-implementation-notes.md) § 5). **Detection:** a
 configure-only run of the script's cmake line reproduces the working build's CMake cache
 (`CMAKE_CUDA_ARCHITECTURES`, `CMAKE_CUDA_FLAGS`, `GGML_CUDA`, `LLAMA_CURL`, `CMAKE_BUILD_TYPE`).
-**Remaining gap:** a full clean rebuild and a request against it have not been run.
+**Closed for the stopgap:** a clean rebuild (2026-10-23) from the script's cmake line into an empty scratch directory built
+`llama-server` at the same commit (`6753a03`); `--list-devices` shows `CUDA0: NVIDIA GB10`, and with
+every layer offloaded (`-ngl 99`) it answered a request correctly ("What is 17 + 25?" → `42`) with no
+"no kernel image" error.
 
 ### R8 — Launch configuration in two places *(medium likelihood)*
 

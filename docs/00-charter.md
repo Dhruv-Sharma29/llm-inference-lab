@@ -83,7 +83,7 @@ These come from SPEC "Important tests" and "Definition of done", and from the PL
 | S3 | A model-server crash does not leave requests hanging | `test_upstream_crash_mid_stream_terminates_requests`, `test_hung_upstream_hits_deadline_*`; real: `crash` | Met (mock and llama.cpp) |
 | S4 | Oversized inputs are rejected with a clear reason before they reach the server | `test_oversized_input_rejected_before_upstream`, `test_oversized_body_rejected`; real: `oversized` | Met |
 | S5 | Logs do not store credentials or prompt content | `test_logs_contain_no_prompts_outputs_or_credentials` | Met (mock) |
-| S6 | Reproducible endpoint: a second clean run from the written instructions succeeds | PLAN M1 exit | **Not met.** vLLM path never run. The llama.cpp script differs from the recorded build ([09](09-implementation-notes.md) § 5) |
+| S6 | Reproducible endpoint: a second clean run from the written instructions succeeds | PLAN M1 exit | **Met for the llama.cpp stopgap** (clean rebuild from the script served a request, 2026-10-23); **not met for vLLM**, which needs Docker on the host ([09](09-implementation-notes.md) § 5) |
 | S7 | Raw results include every success and failure, and the summary regenerates with one command | `test_summary_counts_failures_and_excludes_warmup`; `summarize.py` reproduces the committed smoke summary | Met for the harness. **No baseline run** |
 | S8 | At least one fair comparison against the baseline, with every trade-off explained | `results/summary/EXP-NN.md` (PLAN M4) | **Not met** |
 | S9 | Overload demo recorded against a real model | PLAN M3 | Partly: the burst check is in `real_upstream_checks.json`, but there is no `overload_demo.py` recording |

@@ -100,8 +100,8 @@ scripts/llamacpp_serve.sh stop
   the GGUF hash in `models/SHA256SUMS`. Compare it against the sha256 in `env/ENVIRONMENT.md`.
 - **Build flags.** The script passes the recorded working flags, `-DCMAKE_CUDA_ARCHITECTURES=OFF
   -DCMAKE_CUDA_FLAGS=-gencode=arch=compute_120,code=compute_120` (`env/ENVIRONMENT.md`). A
-  configure-only run reproduces the working build's CMake cache; a full clean rebuild from the
-  script has not been run. If requests fail with "no kernel image is available", check those two
+  configure-only run reproduces the working build's CMake cache, and a clean rebuild from the
+  script served a request on the GB10 (2026-10-23). If requests fail with "no kernel image is available", check those two
   values in `.tools/llama.cpp/build/CMakeCache.txt`
   ([docs/09-implementation-notes.md](docs/09-implementation-notes.md) § 5).
 - The first request after start is slow, because the PTX is JIT-compiled. `CUDA_CACHE_MAXSIZE`

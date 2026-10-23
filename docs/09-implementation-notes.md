@@ -57,8 +57,11 @@ The committed `scripts/llamacpp_setup.sh` used to pass `-DCMAKE_CUDA_ARCHITECTUR
 setting that fails. Fixed 2026-10-23: the script now passes the recorded flags, and a configure-only
 run of its cmake line into a scratch directory gives the same `CMAKE_CUDA_ARCHITECTURES` (OFF),
 `CMAKE_CUDA_FLAGS`, `GGML_CUDA`, `LLAMA_CURL` and `CMAKE_BUILD_TYPE` as the working build's
-`CMakeCache.txt`. Not yet done: a full clean rebuild from the script and a request against it, which
-is what criterion S6 (reproducible endpoint) needs.
+`CMakeCache.txt`. Then a clean rebuild (2026-10-23) from the script's cmake line into an empty scratch directory built
+`llama-server` at the same commit (`6753a03`); `--list-devices` shows `CUDA0: NVIDIA GB10`, and with
+every layer offloaded (`-ngl 99`) it answered a request correctly ("What is 17 + 25?" → `42`) with no
+"no kernel image" error. That closes S6 for the llama.cpp stopgap; the vLLM path is
+still not run.
 
 ### 6. The GGUF converter imports sentencepiece for a BPE model
 
