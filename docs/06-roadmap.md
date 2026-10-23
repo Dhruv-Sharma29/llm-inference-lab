@@ -19,7 +19,7 @@ latest recorded work is from 2026-10-07.
 
 - **M0:** agree benchmark windows with the owners of the background jobs (PLAN M0, unchecked).
 - **M3:** confirm that vLLM aborts the sequence on disconnect, using its running-requests metric.
-  Record `scripts/overload_demo.py` against a real model, with quotas on (PLAN M3).
+  (The overload demo against a real model, with quotas on, was recorded on 2026-10-23.)
 
 ## Definition of done (SPEC), today
 
@@ -29,7 +29,7 @@ latest recorded work is from 2026-10-07.
 | Gateway failure tests pass | ✓ (32 collected: 24 gateway + 8 harness) |
 | ≥ 1 fair comparison vs baseline | ✓ (EXP-05, interleaved Q4_K_M vs Q8_0) |
 | Architecture diagram | ✓ ([01](01-architecture.md), README) |
-| Overload demo | partly: script exists, mock run reported in README **[verify]**, real-model burst in `real_upstream_checks.json` |
+| Overload demo | ✓ recorded against the real model, with and without quotas (`results/summary/overload_demo_real*.json`) |
 | README with real numbers | ✓ (baseline and EXP-05 on the llama.cpp stopgap) |
 
 ## What comes next, in order

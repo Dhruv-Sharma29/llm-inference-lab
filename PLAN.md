@@ -14,7 +14,7 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
 - **M4:** Exp 1 (concurrency, the same sweep) sets the gateway limits for this server (32 in flight, queue 32). Exp 5: Q8_0 vs Q4_K_M, interleaved on the same load: 30 % slower per request, 22–24 % less throughput,
 3 GB more memory, no quality gain (dev 0.93–0.94 vs 0.95–0.96; held-out 60/60 vs 59/60), so Q4_K_M
 stays (`results/summary/EXP-05-quantization.md`).
-- **M3:** gateway built; 24 failure-scenario tests pass against a mock upstream over real TCP, 3/3 runs. Cancellation tests verified to fail without the fix. Still to do against real vLLM: confirm vLLM aborts the sequence on disconnect (check its running-requests metric), quotas in the overload demo recording.
+- **M3:** gateway built; 24 failure-scenario tests pass against a mock upstream over real TCP, 3/3 runs. Cancellation tests verified to fail without the fix. Still to do against real vLLM: confirm vLLM aborts the sequence on disconnect (check its running-requests metric). (Overload demo with quotas recorded on the stopgap, 2026-10-23.)
 - **Deviation from layout:** tests live in `gateway/tests/` and `benchmarks/test_benchmarks.py`; mock server added in `mock_upstream/`.
 
 **Produces for later projects:** a private OpenAI-compatible endpoint (via the gateway), a benchmark harness + result schema, and Prometheus/Grafana monitoring.
@@ -82,7 +82,7 @@ Tests (`gateway/tests/`):
 - [x] Kill model server mid-request → all in-flight requests terminate with `502`/`504` within deadline.
 - [x] Oversized input → `413` with a readable reason, never reaches model server.
 - [x] Grep logs after a test run for prompt sentinels and fake keys → zero hits.
-- [x] Overload demo script (`scripts/overload_demo.py`) — [ ] recording against real model.
+- [x] Overload demo script (`scripts/overload_demo.py`) — [x] recording against real model (`results/summary/overload_demo_real*.json`, with and without quotas).
 - **Exit:** overload produces explicit rejections, measured; all tests pass.
 
 ### M4 — Serving experiments (1–2 weeks)
@@ -108,4 +108,4 @@ Only if M1–M4 are done. Second model loaded sequentially if memory is tight. C
 - Quantized formats on GB10 may not be supported by the pinned image — verify before planning Exp 5.
 
 ## Definition of done
-- [ ] Reproducible endpoint (M1 exit; met for the llama.cpp stopgap, not vLLM) · [x] gateway failure tests pass · [x] ≥1 fair comparison vs baseline (EXP-05) · [x] architecture diagram · [ ] overload demo · [x] README with real numbers
+- [ ] Reproducible endpoint (M1 exit; met for the llama.cpp stopgap, not vLLM) · [x] gateway failure tests pass · [x] ≥1 fair comparison vs baseline (EXP-05) · [x] architecture diagram · [x] overload demo · [x] README with real numbers

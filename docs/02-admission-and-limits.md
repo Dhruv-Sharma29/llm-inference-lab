@@ -79,7 +79,9 @@ moment capacity is scarcest.
 - The buckets live in the process. Two gateway replicas would each grant the full quota.
 
 `test_per_key_quota` (0.1 rps, burst 2) gets `[200, 200, 429]` for key A, and key B is unaffected.
-PLAN M3 still lists "quotas in the overload demo recording" as open.
+The overload demo was recorded against the real model with quotas on (2026-10-23): of a 60-request
+burst from one key at 1 rps / burst 20, 40 got `429 rate_limited` within 30 ms before admission
+control saw them (`results/summary/overload_demo_real_quota.json`).
 
 ## Token counting
 

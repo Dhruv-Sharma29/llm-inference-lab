@@ -57,7 +57,10 @@ The full error contract and design decisions are in [docs/01-architecture.md](do
 The tests are real tests: with Starlette's stock `StreamingResponse` swapped back in, both
 cancellation tests fail (the upstream keeps generating). The gateway's `ManagedStreamingResponse`
 is what fixes it. Overload demo against the mock: a burst of 40 requests against capacity 4 + 8
-queued gave 12 served and 28 rejected in under 30 ms each, with the queue never above 8.
+queued gave 12 served and 28 rejected in under 30 ms each, with the queue never above 8. And against the real model (llama.cpp, 4 in flight, queue 8, 2026-10-23): a 60-request burst gave 4
+served, 48 rejected `429 queue_full` within 46 ms and 8 queued then `503 queue_timeout` at the 10 s
+limit; with per-key quotas on (1 rps, burst 20), 40 got `429 rate_limited` within 30 ms, 8
+`queue_full`, 12 served (`results/summary/overload_demo_real*.json`).
 
 ### Against a real model (llama.cpp stopgap, 2026-10-07)
 

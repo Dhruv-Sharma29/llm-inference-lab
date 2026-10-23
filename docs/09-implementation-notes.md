@@ -157,7 +157,6 @@ acceptable for the benchmark, which always streams.
 |---|---|---|
 | vLLM on the host, image digest, vLLM version | someone with host access | [RUNBOOK.md](../RUNBOOK.md) § 1, PLAN M1 |
 | vLLM aborts the sequence on disconnect | vLLM running | PLAN M3 |
-| Overload demo recording against a real model, with quotas | vLLM, or a rerun on the stopgap | PLAN M3 |
 | Baseline benchmark | M1, a quiet GPU window, a fixed protocol | PLAN M2, [05](05-evaluation.md) § Protocol |
 | `GATEWAY_TOKENIZER_FILE` in `serve.env` | M1 | `env/serve.env` (`TBD`) |
 | Prometheus scrape config + Grafana | a baseline worth watching | PLAN layout `monitoring/` |

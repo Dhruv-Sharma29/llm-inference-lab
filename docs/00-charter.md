@@ -86,7 +86,7 @@ These come from SPEC "Important tests" and "Definition of done", and from the PL
 | S6 | Reproducible endpoint: a second clean run from the written instructions succeeds | PLAN M1 exit | **Met for the llama.cpp stopgap** (clean rebuild from the script served a request, 2026-10-23); **not met for vLLM**, which needs Docker on the host ([09](09-implementation-notes.md) § 5) |
 | S7 | Raw results include every success and failure, and the summary regenerates with one command | `test_summary_counts_failures_and_excludes_warmup`; `summarize.py` reproduces the committed smoke summary | Met: the baseline's 1,800 requests (0 errors) and summary regenerate with `summarize` |
 | S8 | At least one fair comparison against the baseline, with every trade-off explained | `results/summary/EXP-05-quantization.md`: Q8_0 vs Q4_K_M, interleaved, every trade-off explained | Met |
-| S9 | Overload demo recorded against a real model | PLAN M3 | Partly: the burst check is in `real_upstream_checks.json`, but there is no `overload_demo.py` recording |
+| S9 | Overload demo recorded against a real model | PLAN M3 | Met: `overload_demo.py` recorded against the real model, with and without quotas (`results/summary/overload_demo_real*.json`) |
 
 ## The honest risk to the thesis
 
