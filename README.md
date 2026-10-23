@@ -12,9 +12,10 @@ up actually stops the model from generating.
 > host step is scripted in [RUNBOOK.md](RUNBOOK.md) § 1 but not yet run. Meanwhile a
 > llama.cpp stopgap serves the same pinned model from inside the dev container
 > (`scripts/llamacpp_setup.sh`, `scripts/llamacpp_serve.sh`; details in env/ENVIRONMENT.md).
-> **No real-model baseline numbers exist yet**: the shared GPU is busy with other jobs. One smoke run on
-> the stopgap (`results/summary/smoke-llamacpp-sharedgpu.md`, 20 prompts, 1 repetition) checks the
-> harness end to end; it is not a baseline.
+> **Baseline (2026-10-23, llama.cpp stopgap, GPU otherwise idle):** 1,800 requests, 0 errors;
+> 0.46 req/s at 1.8 s median with one request in flight, 1.84 req/s at concurrency 32. Q8_0 is
+> 30 % slower than Q4_K_M with no quality gain, so Q4_K_M stays
+> ([EXP-01](results/summary/EXP-01-concurrency.md), [EXP-05](results/summary/EXP-05-quantization.md)).
 
 ## Architecture
 
@@ -137,8 +138,8 @@ API keys, per-key quota.
 ## Next steps
 
 - **M1:** serve one model from the vLLM recipe pinned by image digest, and reproduce the setup from the README.
-- **M2:** baseline benchmark while the GPU is otherwise idle.
-- **M4:** one-factor-at-a-time experiments (concurrency, input length, batching, prefix caching, quantisation).
+- **M4:** the remaining experiments (input length, batching, prefix caching); find where throughput
+  steps between concurrency 16 and 32 (EXP-01).
 
 ## Docs
 

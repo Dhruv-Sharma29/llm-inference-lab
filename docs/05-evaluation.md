@@ -104,7 +104,33 @@ different background load MUST NOT be compared (`env/ENVIRONMENT.md`).
 
 ## Results so far
 
-One run against a real model exists: `results/summary/smoke-llamacpp-sharedgpu.md`, from
+### Baseline and Exp 1 (2026-10-23)
+
+[EXP-01](../results/summary/EXP-01-concurrency.md): all 100 dev prompts, concurrency 1–32, 3
+repetitions, 5 warm-ups, `max_tokens` 256, prompt cache off, on the llama.cpp stopgap with the GPU
+otherwise idle. 1,800 measured requests, 0 errors, quality 0.95.
+
+| Concurrency | e2e p50 / p95 (s) | Decode tok/s per request | Aggregate output tok/s | OK req/s |
+| --- | --- | --- | --- | --- |
+| 1 | 1.79 / 4.82 | 42.2 | 39.1 | 0.46 |
+| 4 | 5.75 / 18.83 | 11.3 | 44.1 | 0.52 |
+| 8 | 8.95 / 27.25 | 7.5 | 57.2 | 0.67 |
+| 16 | 14.04 / 46.23 | 4.6 | 68.9 | 0.81 |
+| 32 | 9.04 / 31.30 | 7.3 | 156.3 | 1.84 |
+
+Concurrency 32 is faster per request than 16 in every repetition; the cause is not established
+**[verify]** (EXP-01).
+
+### Exp 5: quantization (2026-10-23)
+
+[EXP-05](../results/summary/EXP-05-quantization.md): Q4_K_M vs Q8_0, both served at once and
+interleaved so they see the same load. Q8_0 is 30 % slower per request, 22–24 % lower in
+throughput, 3 GB larger, and not better (dev 0.93–0.94 vs 0.95–0.96; held-out 60/60 vs 59/60).
+Q4_K_M stays.
+
+### The earlier smoke run
+
+One earlier run against a real model exists: `results/summary/smoke-llamacpp-sharedgpu.md`, from
 `results/raw/smoke/20261007T035456Z-smoke-llamacpp-sharedgpu.jsonl`. Running
 `summarize.py` on the raw file reproduces the committed table.
 

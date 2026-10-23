@@ -131,3 +131,11 @@ wait 20 s or more against a 10 s queue timeout, so most of a full default queue 
 `503 queue_timeout`, not `200`. A rough rule is that the useful queue depth is about
 `max_inflight × queue_timeout_s / service_time`. Exp 1 should set all three numbers together, not
 `max_inflight` alone.
+
+**Measured (Exp 1, 2026-10-23, llama.cpp at 32 slots, `results/summary/EXP-01-concurrency.md`).**
+Throughput barely moves from 1 to 4 requests in flight (0.46 → 0.52 req/s) while p95 latency nearly
+quadruples, and 32 in flight beats 8 and 16 on throughput (1.84 req/s) at a similar median (9.0 s).
+So for that server: `GATEWAY_MAX_INFLIGHT=32` (its slot count), and by the rule above
+32 × 10 / 9 ≈ 35, `GATEWAY_MAX_QUEUE=32` with `QUEUE_TIMEOUT_S=10`. For an interactive target
+(median under 2 s), 1–2 in flight. The code defaults (8 / 32) are left for the vLLM server, whose
+limit is 16 sequences; set them per deployment through the environment.

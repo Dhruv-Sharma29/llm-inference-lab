@@ -7,7 +7,13 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
 - **M0:** done → `env/ENVIRONMENT.md`. Two blockers found: no container runtime; GPU shared with other long-running jobs (~95 % util, ~77 GiB used).
 - **M1 (stopgap):** a real model (llama.cpp, same pinned Qwen2.5-7B) is served inside the container; the gateway checks against it pass (cancellation, overload, crash, limits). The vLLM host path is scripted ([RUNBOOK.md](RUNBOOK.md) § 1) but not run.
 - **M1 (original):** blocked on container runtime. Candidate model cached: Qwen2.5-7B-Instruct (Apache-2.0), revision recorded.
-- **M2:** harness built and tested against the mock (prompt generator 100 dev + 60 held-out, validators, load client, summariser). No real-model baseline yet; one smoke run of the harness on the llama.cpp stopgap (`results/summary/smoke-llamacpp-sharedgpu.md`).
+- **M2:** harness built and tested; **baseline run 2026-10-23** on the llama.cpp stopgap (Qwen2.5-7B Q4_K_M, 32 slots, prompt cache off, GPU otherwise idle):
+1,800 requests, 0 errors; concurrency 1 gives 1.8 s median end-to-end at 42 decode tokens/s and
+0.46 req/s, concurrency 32 gives 1.84 req/s and 156 aggregate output tokens/s at 9.0 s median
+(`results/summary/EXP-01-concurrency.md`).
+- **M4:** Exp 1 (concurrency, the same sweep) sets the gateway limits for this server (32 in flight, queue 32). Exp 5: Q8_0 vs Q4_K_M, interleaved on the same load: 30 % slower per request, 22–24 % less throughput,
+3 GB more memory, no quality gain (dev 0.93–0.94 vs 0.95–0.96; held-out 60/60 vs 59/60), so Q4_K_M
+stays (`results/summary/EXP-05-quantization.md`).
 - **M3:** gateway built; 24 failure-scenario tests pass against a mock upstream over real TCP, 3/3 runs. Cancellation tests verified to fail without the fix. Still to do against real vLLM: confirm vLLM aborts the sequence on disconnect (check its running-requests metric), quotas in the overload demo recording.
 - **Deviation from layout:** tests live in `gateway/tests/` and `benchmarks/test_benchmarks.py`; mock server added in `mock_upstream/`.
 
@@ -53,9 +59,9 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
 
 ### M2 — Baseline benchmark (3–5 days)
 - [x] Build `prompts/dev.jsonl` (~100) with category, input-length bucket (short/long), and a validator per prompt. Build a separate `heldout.jsonl`.
-- [ ] Fix the output budget (`max_tokens`), temperature (0 for validators), and stop conditions.
+- [x] Fix the output budget (`max_tokens`), temperature (0 for validators), and stop conditions. (256 tokens, temperature 0, EOS only.)
 - [x] Benchmark client: async, streaming, records per request → `request_id, prompt_id, concurrency, input_tokens, output_tokens, ttft_ms, e2e_ms, status, error, validator_pass`.
-- [ ] Protocol: N warm-up requests discarded; ≥3 repetitions; cache state documented (prefix cache on/off).
+- [x] Protocol: N warm-up requests discarded; ≥3 repetitions; cache state documented (prefix cache on/off). (5 warm-ups, 3 reps, `--no-cache-prompt`, `/props` saved per run.)
 - [x] Summary script → p50/p95 latency, TTFT, tokens/s (state per-request vs aggregate), successful req/s, error count, validator pass rate.
 - **Exit:** raw results include every success **and** failure; summary regenerates from raw with one command.
 
@@ -102,4 +108,4 @@ Only if M1–M4 are done. Second model loaded sequentially if memory is tight. C
 - Quantized formats on GB10 may not be supported by the pinned image — verify before planning Exp 5.
 
 ## Definition of done
-- [ ] Reproducible endpoint (M1 exit) · [ ] gateway failure tests pass · [ ] ≥1 fair comparison vs baseline · [ ] architecture diagram · [ ] overload demo · [ ] README with real numbers
+- [ ] Reproducible endpoint (M1 exit; met for the llama.cpp stopgap, not vLLM) · [x] gateway failure tests pass · [x] ≥1 fair comparison vs baseline (EXP-05) · [x] architecture diagram · [ ] overload demo · [x] README with real numbers
