@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Stopgap model server inside the (unprivileged) dev container: llama.cpp built from a pinned tag,
 # serving the same pinned Qwen2.5-7B-Instruct revision the vLLM plan uses. No system changes:
-# everything lands in .tools/ and models/ (both gitignored). See docs/host-setup.md for the
+# everything lands in .tools/ and models/ (both gitignored). See RUNBOOK.md (section 1) for the
 # intended vLLM path; the gateway is identical for both (only GATEWAY_UPSTREAM_URL changes).
 set -euo pipefail
 cd "$(dirname "$0")/.."

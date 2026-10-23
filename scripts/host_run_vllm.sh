@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # RUN ON THE GX10 HOST (not inside the development container): the development environment is an
-# unprivileged container and cannot run a Docker daemon. See docs/host-setup.md.
+# unprivileged container and cannot run a Docker daemon. See RUNBOOK.md (section 1).
 #
 # Adapted from NVIDIA's DGX Spark vLLM playbook (dgx-spark-playbooks, playbook-vllm,
 # sync-vllm-single-spark.sh): same image and container flags, changed for this project:
