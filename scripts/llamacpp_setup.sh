@@ -15,11 +15,13 @@ mkdir -p .tools models
 if [ ! -d .tools/llama.cpp ]; then
   git clone --depth 1 --branch "$TAG" https://github.com/ggml-org/llama.cpp .tools/llama.cpp
 fi
-# GB10 is compute capability 12.1; the host's CUDA 12.8 compiler targets up to 12.0. Code built for
-# 12.0 runs on 12.1 (same major version), and the 12.0 PTX is embedded as a JIT fallback.
+# GB10 is compute capability 12.1; the host's CUDA 12.8 compiler targets up to 12.0. With
+# CMAKE_CUDA_ARCHITECTURES=120, llama.cpp rewrites it to 120a, which fails on 12.1 ("no kernel image
+# is available"). So architectures are OFF and -gencode embeds plain 12.0 PTX, JIT-compiled by the
+# driver on first load. These are the flags of the build that ran (env/ENVIRONMENT.md).
 if [ ! -x .tools/llama.cpp/build/bin/llama-server ]; then
-  cmake -S .tools/llama.cpp -B .tools/llama.cpp/build -G Ninja -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=120 \
-        -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release
+  cmake -S .tools/llama.cpp -B .tools/llama.cpp/build -G Ninja -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=OFF \
+        -DCMAKE_CUDA_FLAGS="-gencode=arch=compute_120,code=compute_120" -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release
   ninja -C .tools/llama.cpp/build -j 12 llama-server llama-quantize
 fi
 if [ ! -f "$Q4" ]; then

@@ -98,10 +98,11 @@ scripts/llamacpp_serve.sh stop
 - The setup script expects the pinned snapshot in the HF cache (`$HF_HOME`, default
   `~/.cache/huggingface`). It writes only to `.tools/` and `models/`, both gitignored, and records
   the GGUF hash in `models/SHA256SUMS`. Compare it against the sha256 in `env/ENVIRONMENT.md`.
-- **Build flags: [verify].** The script passes `-DCMAKE_CUDA_ARCHITECTURES=120`. The working build
-  recorded in `env/ENVIRONMENT.md` used `-DCMAKE_CUDA_ARCHITECTURES=OFF
-  -DCMAKE_CUDA_FLAGS=-gencode=arch=compute_120,code=compute_120`. If requests fail with "no kernel
-  image is available", rebuild with the recorded flags
+- **Build flags.** The script passes the recorded working flags, `-DCMAKE_CUDA_ARCHITECTURES=OFF
+  -DCMAKE_CUDA_FLAGS=-gencode=arch=compute_120,code=compute_120` (`env/ENVIRONMENT.md`). A
+  configure-only run reproduces the working build's CMake cache; a full clean rebuild from the
+  script has not been run. If requests fail with "no kernel image is available", check those two
+  values in `.tools/llama.cpp/build/CMakeCache.txt`
   ([docs/09-implementation-notes.md](docs/09-implementation-notes.md) § 5).
 - The first request after start is slow, because the PTX is JIT-compiled. `CUDA_CACHE_MAXSIZE`
   keeps the compiled kernels between starts.

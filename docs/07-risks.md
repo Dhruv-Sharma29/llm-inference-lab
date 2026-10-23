@@ -66,13 +66,14 @@ scripted end to end ([RUNBOOK.md](../RUNBOOK.md) § 1). It needs one person with
 15 GB of disk for the model, and a memory check. The stopgap keeps M3 and the companion projects
 unblocked meanwhile.
 
-### R7 — The stopgap build is not reproducible from the committed script *(likely, medium impact)*
+### R7 — The stopgap build drifts from the committed script *(low now, medium impact)*
 
-`env/ENVIRONMENT.md` records the working build as `-DCMAKE_CUDA_ARCHITECTURES=OFF` with
-compute_120 PTX. `scripts/llamacpp_setup.sh` passes `-DCMAKE_CUDA_ARCHITECTURES=120`, which is
-the setting ENVIRONMENT.md says fails on GB10 ([09](09-implementation-notes.md) § 5).
-**Detection:** a clean rebuild from the script. **Mitigation:** run that rebuild, then make the
-script and the record agree.
+Until 2026-10-23, `scripts/llamacpp_setup.sh` passed `-DCMAKE_CUDA_ARCHITECTURES=120`, the setting
+ENVIRONMENT.md says fails on GB10, while the working build used `OFF` with compute_120 PTX. The
+script now passes the recorded flags ([09](09-implementation-notes.md) § 5). **Detection:** a
+configure-only run of the script's cmake line reproduces the working build's CMake cache
+(`CMAKE_CUDA_ARCHITECTURES`, `CMAKE_CUDA_FLAGS`, `GGML_CUDA`, `LLAMA_CURL`, `CMAKE_BUILD_TYPE`).
+**Remaining gap:** a full clean rebuild and a request against it have not been run.
 
 ### R8 — Launch configuration in two places *(medium likelihood)*
 

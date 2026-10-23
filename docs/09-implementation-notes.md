@@ -45,7 +45,7 @@ SIGKILLed the server, it lingered as a zombie, and `kill -0` still reported it a
 restart logic thought nothing was wrong. `running()` in `llamacpp_serve.sh` now reads the
 process state and treats `Z` as dead.
 
-### 5. GB10 needs PTX, and the script and the record disagree
+### 5. GB10 needs PTX; the script now matches the record
 
 ENVIRONMENT.md: GB10 is compute capability 12.1, host CUDA 12.8 targets at most 12.0, and
 llama.cpp's rewrite of `120` to `120a` fails on 12.1 with "no kernel image is available". The
@@ -53,11 +53,12 @@ recorded working build is `-DCMAKE_CUDA_ARCHITECTURES=OFF
 -DCMAKE_CUDA_FLAGS=-gencode=arch=compute_120,code=compute_120`. That is plain PTX, JIT-compiled by
 the driver on first use, and it needs `CUDA_CACHE_MAXSIZE` raised.
 
-The committed `scripts/llamacpp_setup.sh`, however, passes `-DCMAKE_CUDA_ARCHITECTURES=120`. Its
-comment says code built for 12.0 runs on 12.1 with PTX as a JIT fallback. **[verify]** with a
-clean rebuild from the script which of the two is right, then make the script and ENVIRONMENT.md
-agree. Until that is done, criterion S6 (reproducible endpoint) cannot be met even for the
-stopgap.
+The committed `scripts/llamacpp_setup.sh` used to pass `-DCMAKE_CUDA_ARCHITECTURES=120`, the
+setting that fails. Fixed 2026-10-23: the script now passes the recorded flags, and a configure-only
+run of its cmake line into a scratch directory gives the same `CMAKE_CUDA_ARCHITECTURES` (OFF),
+`CMAKE_CUDA_FLAGS`, `GGML_CUDA`, `LLAMA_CURL` and `CMAKE_BUILD_TYPE` as the working build's
+`CMakeCache.txt`. Not yet done: a full clean rebuild from the script and a request against it, which
+is what criterion S6 (reproducible endpoint) needs.
 
 ### 6. The GGUF converter imports sentencepiece for a BPE model
 
