@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+from types import SimpleNamespace
 
+import httpx
+
+from benchmarks.client.bench import one_request
 from benchmarks.client.summarize import pct, summarise
 from benchmarks.prompts.generate import build
 from benchmarks.validators.validators import validate
@@ -86,3 +91,24 @@ def test_macos_memory_parser_on_real_vm_stat_format(monkeypatch):
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout=sample))
     # (262144 + 131072 + 65536) pages x 16 KiB = 7.0 GiB
     assert bench._mem_used_gib_macos() == 7.0
+
+
+def _stream(lines: list[str]) -> dict:
+    """One request against a fake upstream that streams exactly `lines`."""
+    body = "".join(f"{line}\n\n" for line in lines).encode()
+    transport = httpx.MockTransport(lambda req: httpx.Response(200, content=body,
+                                                               headers={"content-type": "text/event-stream"}))
+    args = SimpleNamespace(model="m", max_tokens=8, temperature=0, seed=None, store_output=False)
+    prompt = {"messages": [{"role": "user", "content": "x"}], "validator": {"type": "final_integer", "expected": 7}}
+
+    async def go():
+        async with httpx.AsyncClient(transport=transport, base_url="http://upstream") as c:
+            return await one_request(c, args, prompt)
+    return asyncio.run(go())
+
+
+def test_stream_without_done_is_an_error_not_a_success():
+    chunk = 'data: {"choices": [{"delta": {"content": "7"}}]}'
+    assert _stream([chunk, "data: [DONE]"])["ok"]
+    cut = _stream([chunk])                      # connection closed before [DONE]
+    assert not cut["ok"] and cut["error"] == "stream_truncated"

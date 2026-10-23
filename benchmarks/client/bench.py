@@ -108,8 +108,12 @@ async def one_request(client: httpx.AsyncClient, args, prompt: dict) -> dict:
                 except (ValueError, AttributeError):
                     rec["error"] = f"http_{r.status_code}"
             else:
+                done = False
                 async for line in r.aiter_lines():
-                    if not line.startswith("data: ") or line == "data: [DONE]":
+                    if line == "data: [DONE]":
+                        done = True
+                        continue
+                    if not line.startswith("data: "):
                         continue
                     event = json.loads(line[6:])
                     if "error" in event:  # gateway-injected mid-stream error
@@ -126,6 +130,8 @@ async def one_request(client: httpx.AsyncClient, args, prompt: dict) -> dict:
                             text_parts.append(content)
                         if choice.get("finish_reason"):
                             rec["finish_reason"] = choice["finish_reason"]
+                if not done and rec["error"] is None:   # ended without [DONE]: cut off, not a success
+                    rec["error"] = "stream_truncated"
     except httpx.HTTPError as e:
         rec["error"] = type(e).__name__
     rec["e2e_ms"] = round((time.perf_counter() - t0) * 1000, 2)

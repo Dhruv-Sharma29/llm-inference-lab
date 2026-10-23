@@ -93,15 +93,16 @@ list: a client that disconnects while queued gives up its place and is never for
 (`test_client_leaving_the_queue_never_reaches_upstream`). Retrying clients would otherwise create
 ghost work during overload ([02](02-admission-and-limits.md)).
 
-### 10. Mid-stream failures are in-band, and the client does not check for `[DONE]`
+### 10. Mid-stream failures are in-band, and the client now requires `[DONE]` (fixed 2026-10-23)
 
 Once a stream has sent `200`, the status cannot change, so timeouts and upstream failures arrive as
 an SSE `error` event with no `[DONE]` after it. [01](01-architecture.md) says *"a stream without
-`[DONE]` is never a success; the benchmark client counts it as an error."* The code delivers less
-than that. `bench.py` fails a request when it sees an `error` event, but it never checks that
-`[DONE]` arrived, and the gateway records a stream the upstream closed normally as `ok`. So a
-stream that is truncated *without* an error event counts as a success. The fix is a few lines in
-`bench.py` (require `[DONE]`). It has not been made, because these docs do not change code.
+`[DONE]` is never a success; the benchmark client counts it as an error."* Until 2026-10-23
+`bench.py` failed a request only when it saw an `error` event, so a stream truncated without one
+counted as a success. It now records `stream_truncated` when a `200` stream ends without `[DONE]`;
+`test_stream_without_done_is_an_error_not_a_success` checks both cases and fails on the old code.
+The committed smoke run predates the fix; its 40 measured requests (and 2 warm-ups) all ended with
+finish reason `stop`, so its numbers are unaffected.
 
 ### 11. The gateway fills in `max_tokens`
 
