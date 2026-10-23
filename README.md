@@ -7,12 +7,14 @@ to keep latency predictable under load. It does that by refusing work it can't s
 up actually stops the model from generating.
 
 > **Status:** the gateway and benchmark tooling are complete and tested against a mock model
-> server (31 tests). The real model server (vLLM, NVIDIA's DGX Spark image) runs on the GX10 host,
+> server (32 tests). The real model server (vLLM, NVIDIA's DGX Spark image) runs on the GX10 host,
 > because the development environment is an unprivileged container that can't run Docker. The
 > host step is scripted in [RUNBOOK.md](RUNBOOK.md) § 1 but not yet run. Meanwhile a
 > llama.cpp stopgap serves the same pinned model from inside the dev container
 > (`scripts/llamacpp_setup.sh`, `scripts/llamacpp_serve.sh`; details in env/ENVIRONMENT.md).
-> **No real-model performance numbers exist yet**: the shared GPU is busy with other jobs.
+> **No real-model baseline numbers exist yet**: the shared GPU is busy with other jobs. One smoke run on
+> the stopgap (`results/summary/smoke-llamacpp-sharedgpu.md`, 20 prompts, 1 repetition) checks the
+> harness end to end; it is not a baseline.
 
 ## Architecture
 
@@ -85,7 +87,7 @@ other users' jobs.
 
 ```bash
 uv sync --extra tokenizer             # Python 3.12, versions pinned in uv.lock
-uv run pytest                         # 31 tests (~40 s)
+uv run pytest                         # 32 tests (~40 s)
 scripts/dev_stack.sh                  # mock model server :8000 + gateway :9000 (loopback)
 
 # in another shell

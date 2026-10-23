@@ -7,7 +7,7 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
 - **M0:** done → `env/ENVIRONMENT.md`. Two blockers found: no container runtime; GPU shared with other long-running jobs (~95 % util, ~77 GiB used).
 - **M1 (stopgap):** a real model (llama.cpp, same pinned Qwen2.5-7B) is served inside the container; the gateway checks against it pass (cancellation, overload, crash, limits). The vLLM host path is scripted ([RUNBOOK.md](RUNBOOK.md) § 1) but not run.
 - **M1 (original):** blocked on container runtime. Candidate model cached: Qwen2.5-7B-Instruct (Apache-2.0), revision recorded.
-- **M2:** harness built and tested against the mock (prompt generator 100 dev + 60 held-out, validators, load client, summariser). No real-model results yet.
+- **M2:** harness built and tested against the mock (prompt generator 100 dev + 60 held-out, validators, load client, summariser). No real-model baseline yet; one smoke run of the harness on the llama.cpp stopgap (`results/summary/smoke-llamacpp-sharedgpu.md`).
 - **M3:** gateway built; 24 failure-scenario tests pass against a mock upstream over real TCP, 3/3 runs. Cancellation tests verified to fail without the fix. Still to do against real vLLM: confirm vLLM aborts the sequence on disconnect (check its running-requests metric), quotas in the overload demo recording.
 - **Deviation from layout:** tests live in `gateway/tests/` and `benchmarks/test_benchmarks.py`; mock server added in `mock_upstream/`.
 
