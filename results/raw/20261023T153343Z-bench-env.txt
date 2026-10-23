@@ -1,0 +1,30 @@
+2026-10-23T15:34:00Z
+0 %
+645688, 8084 MiB
+.tools/llama.cpp/build/bin/llama-server -m models/qwen2.5-7b-instruct-a09a354-Q4_K_M.gguf --no-cache
+
+Mem:             119          15          38           0          67         104
+2026-10-23T16:21:49Z
+92 %
+645688, 8104 MiB
+.tools/llama.cpp/build/bin/llama-server -m models/qwen2.5-7b-instruct-a09a354-Q4_K_M.gguf --no-cache
+
+Mem:             119          17          36           0          67         102
+2026-10-23T16:24:25Z
+0 %
+726260, 8084 MiB
+726841, 11082 MiB
+.tools/llama.cpp/build/bin/llama-server -m models/qwen2.5-7b-instruct-a09a354-Q4_K_M.gguf --no-cache
+
+.tools/llama.cpp/build/bin/llama-server -m models/qwen2.5-7b-instruct-a09a354-Q8_0.gguf --alias qwen
+
+Mem:             119          27          26           1          67          92
+2026-10-23T17:14:25Z
+93 %
+726260, 8100 MiB
+726841, 11096 MiB
+.tools/llama.cpp/build/bin/llama-server -m models/qwen2.5-7b-instruct-a09a354-Q4_K_M.gguf --no-cache
+
+.tools/llama.cpp/build/bin/llama-server -m models/qwen2.5-7b-instruct-a09a354-Q8_0.gguf --alias qwen
+
+Mem:             119          34          19           1          67          85
