@@ -3,6 +3,7 @@ explicitly (429/503 with Retry-After) instead of queueing without bound.
 
     python scripts/overload_demo.py --gateway http://127.0.0.1:9000 --model <name> --burst 60
     python scripts/overload_demo.py ... --mock   # against mock_upstream: adds slow fake generation
+    python scripts/overload_demo.py ... --api-key KEY   # when the gateway has GATEWAY_API_KEYS (and quotas) set
 """
 
 from __future__ import annotations
@@ -37,7 +38,8 @@ async def main(args) -> None:
         return r.status_code, kind, (time.perf_counter() - t0) * 1000
 
     limits = httpx.Limits(max_connections=args.burst + 8)
-    async with httpx.AsyncClient(base_url=args.gateway, timeout=120, limits=limits) as client:
+    headers = {"Authorization": f"Bearer {args.api_key}"} if args.api_key else {}
+    async with httpx.AsyncClient(base_url=args.gateway, timeout=120, limits=limits, headers=headers) as client:
         watcher = asyncio.create_task(watch(client))
         results = await asyncio.gather(*(fire(client) for _ in range(args.burst)))
         done.set()
@@ -62,5 +64,6 @@ if __name__ == "__main__":
     p.add_argument("--burst", type=int, default=60)
     p.add_argument("--max-tokens", type=int, default=64)
     p.add_argument("--mock", action="store_true")
+    p.add_argument("--api-key", help="bearer key for a gateway with GATEWAY_API_KEYS set")
     p.add_argument("--out")
     asyncio.run(main(p.parse_args()))
