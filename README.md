@@ -141,8 +141,8 @@ API keys, per-key quota.
 ## Next steps
 
 - **M1:** serve one model from the vLLM recipe pinned by image digest, and reproduce the setup from the README.
-- **M4:** the remaining experiments (input length, batching, prefix caching); find where throughput
-  steps between concurrency 16 and 32 (EXP-01).
+- **M4:** the remaining experiments (batching, prefix caching); find where throughput steps
+  between concurrency 16 and 32 (EXP-01).
 
 ## Docs
 

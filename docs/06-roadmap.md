@@ -12,7 +12,7 @@ latest recorded work is from 2026-10-07.
 | **M1** Hardware smoke test | A second clean run from written instructions succeeds | **Blocked** on vLLM (no container runtime in the dev environment). **Stopgap running**: llama.cpp serves the pinned model | [RUNBOOK.md](../RUNBOOK.md) § 1–2; `results/summary/real_upstream_checks.json` |
 | **M2** Baseline benchmark | Raw results include every success and failure; the summary regenerates from raw with one command | **Done 2026-10-23** on the llama.cpp stopgap (vLLM still blocked) | `results/summary/baseline-q4.md`, [EXP-01](../results/summary/EXP-01-concurrency.md) |
 | **M3** Gateway correctness | Overload produces explicit, measured rejections; all tests pass | **Done** against the mock and llama.cpp. vLLM abort and a recorded overload demo still open | 24 gateway tests; `real_upstream_checks.json` |
-| **M4** Serving experiments | One fair comparison against M2, with every trade-off explained | **Exit met**: Exp 1 (concurrency) and Exp 5 (quantization) done; Exps 2–4 not run | [EXP-01](../results/summary/EXP-01-concurrency.md), [EXP-05](../results/summary/EXP-05-quantization.md) |
+| **M4** Serving experiments | One fair comparison against M2, with every trade-off explained | **Exit met**: Exp 1 (concurrency), Exp 2 (input length, from the Exp 1 data) and Exp 5 (quantization) done; Exps 3–4 not run | [EXP-01](../results/summary/EXP-01-concurrency.md), [EXP-05](../results/summary/EXP-05-quantization.md) |
 | **M5** Optional router | Static vs task-category routing on quality, latency, memory | **Not started.** Only after M1–M4 | – |
 
 ### Open items inside "done" milestones
@@ -42,8 +42,8 @@ latest recorded work is from 2026-10-07.
 3. ~~**Fix the protocol, then run the M2 baseline.**~~ Done 2026-10-23 on the llama.cpp stopgap,
    with the GPU otherwise idle ([EXP-01](../results/summary/EXP-01-concurrency.md)). Re-run on vLLM once step 1 is done.
 4. ~~**M4 Exp 1 (concurrency)**~~ done (gateway limits for this server: 32 in flight, queue 32).
-   Exp 5 (quantization) done. Next: find the throughput step between concurrency 16 and 32, then
-   Exps 2–4.
+   Exp 2 (input length, [EXP-02](../results/summary/EXP-02-input-length.md)) and Exp 5 (quantization)
+   done. Next: find the throughput step between concurrency 16 and 32, then Exps 3–4.
 5. **Monitoring.** A Prometheus scrape config and a Grafana dashboard over the existing `/metrics`
    (PLAN layout: `monitoring/`). Do this only once there is a baseline worth watching.
 

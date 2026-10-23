@@ -121,6 +121,13 @@ otherwise idle. 1,800 measured requests, 0 errors, quality 0.95.
 Concurrency 32 is faster per request than 16 in every repetition; the cause is not established
 **[verify]** (EXP-01).
 
+### Exp 2: input length (from the Exp 1 data)
+
+[EXP-02](../results/summary/EXP-02-input-length.md): at concurrency 1, 1,373-token prompts reach the
+first token in 433 ms against 53 ms for 104-token prompts; end-to-end latency follows output length
+instead (the long bucket's replies are half as long, and it has no reasoning prompts, a confound
+the prompt set can't remove).
+
 ### Exp 5: quantization (2026-10-23)
 
 [EXP-05](../results/summary/EXP-05-quantization.md): Q4_K_M vs Q8_0, both served at once and
