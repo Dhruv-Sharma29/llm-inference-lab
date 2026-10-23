@@ -1,0 +1,56 @@
+{
+ "at": "2026-10-07T03:51:02.894411+00:00",
+ "upstream": "http://127.0.0.1:21000",
+ "gpu_utilisation_before": "95 %",
+ "basics": {
+  "non_stream_status": 200,
+  "non_stream_text": "OK",
+  "stream_status": 200,
+  "stream_ended_with_done": true
+ },
+ "oversized": {
+  "status": 413,
+  "error": "input_too_large",
+  "message": "Input is ~5009 tokens; the limit is 3500.",
+  "server_untouched": true
+ },
+ "cancellation": {
+  "chunks_read_before_disconnect": 10,
+  "slots_busy_while_streaming": 1,
+  "slot_idle_s_after_disconnect": 0.4,
+  "tokens_generated_total": 11,
+  "requested_max_tokens": 400,
+  "tokens_generated_in_3s_after_idle": 0,
+  "seconds_streamed": 1.6
+ },
+ "overload": {
+  "burst": 20,
+  "capacity": "4 in flight + 4 queued",
+  "peak": {
+   "inflight": 4,
+   "waiting": 4
+  },
+  "outcomes": {
+   "200 ok": {
+    "count": 8,
+    "max_s": 11.0
+   },
+   "429 queue_full": {
+    "count": 12,
+    "max_s": 0.07
+   }
+  }
+ },
+ "crash": {
+  "stream_ended_s_after_kill": 0.01,
+  "last_event": "data: {\"error\": {\"type\": \"upstream_error\", \"message\": \"Model server connection failed mid-stream.\", \"request_id\": \"62aa223429364c54bfa4a70752aec612\"}}",
+  "next_request": {
+   "status": 502,
+   "error": "upstream_unavailable",
+   "seconds": 0.04
+  },
+  "server_restarted": true,
+  "restart_output": "ready: qwen2.5-7b-instruct on 127.0.0.1:21000 (pid 676937)",
+  "seconds_total": 200.0
+ }
+}
