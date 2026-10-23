@@ -15,7 +15,7 @@ results are only comparable across runs with the same record.
 | CUDA toolkit on host | 12.8 (`nvcc`) | `nvcc --version`; containers bring their own |
 | Memory | 119.7 GiB visible (unified CPU+GPU) | `/proc/meminfo` MemTotal |
 | Python (harness) | 3.12.3, deps pinned in `uv.lock` | `uv sync` |
-| Container runtime | **not available inside the dev environment**: it is itself an unprivileged Docker container (`/.dockerenv`; CapEff `a80425fb`, no `CAP_SYS_ADMIN`; read-only cgroup2; no host docker socket) | vLLM runs on the host: docs/host-setup.md |
+| Container runtime | **not available inside the dev environment**: it is itself an unprivileged Docker container (`/.dockerenv`; CapEff `a80425fb`, no `CAP_SYS_ADMIN`; read-only cgroup2; no host docker socket) | vLLM runs on the host: [RUNBOOK.md](../RUNBOOK.md) § 1 |
 | Network | dev container 172.17.0.4 on the Docker bridge; host gateway 172.17.0.1 | gateway upstream: http://172.17.0.1:8000 |
 
 ## Background load at time of recording — must be resolved before any benchmark
@@ -52,7 +52,7 @@ recipe before relying on it.
 
 ## Stopgap model server inside the dev container (llama.cpp), recorded 2026-10-06
 
-Used until the host vLLM server (docs/host-setup.md) is available. Same gateway; only
+Used until the host vLLM server ([RUNBOOK.md](../RUNBOOK.md) § 1) is available. Same gateway; only
 `GATEWAY_UPSTREAM_URL` changes.
 
 | Item | Value |

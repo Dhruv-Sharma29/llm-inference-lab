@@ -5,7 +5,7 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
 ## Progress (2026-10-06)
 
 - **M0:** done → `env/ENVIRONMENT.md`. Two blockers found: no container runtime; GPU shared with other long-running jobs (~95 % util, ~77 GiB used).
-- **M1 (stopgap):** a real model (llama.cpp, same pinned Qwen2.5-7B) is served inside the container; the gateway checks against it pass (cancellation, overload, crash, limits). The vLLM host path is scripted (docs/host-setup.md) but not run.
+- **M1 (stopgap):** a real model (llama.cpp, same pinned Qwen2.5-7B) is served inside the container; the gateway checks against it pass (cancellation, overload, crash, limits). The vLLM host path is scripted ([RUNBOOK.md](RUNBOOK.md) § 1) but not run.
 - **M1 (original):** blocked on container runtime. Candidate model cached: Qwen2.5-7B-Instruct (Apache-2.0), revision recorded.
 - **M2:** harness built and tested against the mock (prompt generator 100 dev + 60 held-out, validators, load client, summariser). No real-model results yet.
 - **M3:** gateway built; 24 failure-scenario tests pass against a mock upstream over real TCP, 3/3 runs. Cancellation tests verified to fail without the fix. Still to do against real vLLM: confirm vLLM aborts the sequence on disconnect (check its running-requests metric), quotas in the overload demo recording.
@@ -32,7 +32,7 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
     configs/              one YAML per experiment
   monitoring/             prometheus.yml, grafana dashboards
   results/raw/  results/summary/
-  docs/architecture.md    diagram + data/control flow
+  docs/01-architecture.md diagram + data/control flow (full doc set: docs/README.md)
 ```
 
 ## Milestones
@@ -60,7 +60,7 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
 - **Exit:** raw results include every success **and** failure; summary regenerates from raw with one command.
 
 ### M3 — Gateway correctness (1–2 weeks)
-Design decisions to write down in `docs/architecture.md` first:
+Design decisions to write down in [`docs/01-architecture.md`](docs/01-architecture.md) first:
 - Admission control: max in-flight to model server + bounded wait queue. Full queue → `429` (or `503`) with `Retry-After`. Never unbounded growth.
 - Timeouts: total deadline per request, propagated upstream; deadline exceeded → `504` and upstream request aborted.
 - Cancellation: client disconnect on a stream → gateway closes upstream stream so the server frees the sequence.

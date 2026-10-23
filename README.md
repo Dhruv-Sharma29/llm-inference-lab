@@ -9,7 +9,7 @@ up actually stops the model from generating.
 > **Status:** the gateway and benchmark tooling are complete and tested against a mock model
 > server (31 tests). The real model server (vLLM, NVIDIA's DGX Spark image) runs on the GX10 host,
 > because the development environment is an unprivileged container that can't run Docker. The
-> host step is scripted in [docs/host-setup.md](docs/host-setup.md) but not yet run. Meanwhile a
+> host step is scripted in [RUNBOOK.md](RUNBOOK.md) § 1 but not yet run. Meanwhile a
 > llama.cpp stopgap serves the same pinned model from inside the dev container
 > (`scripts/llamacpp_setup.sh`, `scripts/llamacpp_serve.sh`; details in env/ENVIRONMENT.md).
 > **No real-model performance numbers exist yet**: the shared GPU is busy with other jobs.
@@ -34,7 +34,7 @@ flowchart LR
 
 Request checks run cheapest first, and nothing reaches the model unless all pass:
 auth → quota → body size → JSON shape → input tokens and `max_tokens` → bounded queue → model.
-The full error contract and design decisions are in [docs/architecture.md](docs/architecture.md).
+The full error contract and design decisions are in [docs/01-architecture.md](docs/01-architecture.md).
 
 ## What's verified
 
@@ -64,7 +64,7 @@ queued gave 12 served and 28 rejected in under 30 ms each, with the queue never 
 | --- | --- |
 | Client disconnects mid-stream | Server slot idle **0.4 s** later; 11 of 400 requested tokens generated, **0** after idle (generation stopped) |
 | Burst of 20 vs capacity 4 + 4 queued | 8 served, **12 rejected `429` in ≤ 70 ms**, queue never above 4 |
-| Model server SIGKILLed mid-stream | In-band error **10 ms** after the kill; next request `502` in 20 ms; server restarted |
+| Model server SIGKILLed mid-stream | In-band error **10 ms** after the kill; next request `502` in 40 ms (`results/summary/real_upstream_checks.json`); server restarted |
 | Input of ~5,000 tokens (exact tokenizer) | `413` before reaching the server |
 
 Smoke benchmark (`results/summary/smoke-llamacpp-sharedgpu.md`): 40/40 requests OK, **0.95**
@@ -98,7 +98,7 @@ The mock returns placeholder text, so quality scores are 0 by design.
 
 ### With a real model
 
-1. On the host, run `scripts/host_run_vllm.sh` ([docs/host-setup.md](docs/host-setup.md)), then from the development container run `scripts/check_upstream.sh`.
+1. On the host, run `scripts/host_run_vllm.sh` ([RUNBOOK.md](RUNBOOK.md) § 1), then from the development container run `scripts/check_upstream.sh`.
 2. Start the gateway with `GATEWAY_UPSTREAM_URL=http://172.17.0.1:8000` and `GATEWAY_TOKENIZER_FILE=<model>/tokenizer.json`.
 3. Record the background load, then run the baseline: `bench --concurrency 1,2,4,8,16 --repetitions 3 --warmup 5 --label baseline`.
 
@@ -137,6 +137,16 @@ API keys, per-key quota.
 - **M1:** serve one model from the vLLM recipe pinned by image digest, and reproduce the setup from the README.
 - **M2:** baseline benchmark while the GPU is otherwise idle.
 - **M4:** one-factor-at-a-time experiments (concurrency, input length, batching, prefix caching, quantisation).
+
+## Docs
+
+- [start.md](start.md): install, tests, and the gateway, overload demo and harness against the mock. No GPU needed.
+- [RUNBOOK.md](RUNBOOK.md): the steps that need the host, Docker or the GPU (vLLM on the host, the llama.cpp stopgap, real-server checks, baseline).
+- [docs/README.md](docs/README.md): the design record, in reading order: [charter](docs/00-charter.md),
+  [architecture](docs/01-architecture.md), [admission and limits](docs/02-admission-and-limits.md),
+  [streaming and cancellation](docs/03-streaming-and-cancellation.md), [model server](docs/04-model-server.md),
+  [evaluation](docs/05-evaluation.md), [roadmap](docs/06-roadmap.md), [risks](docs/07-risks.md),
+  [learning checklist](docs/08-learning-checklist.md), [implementation notes](docs/09-implementation-notes.md).
 
 Planning documents: [SPEC.md](SPEC.md) · [PLAN.md](PLAN.md)
 
