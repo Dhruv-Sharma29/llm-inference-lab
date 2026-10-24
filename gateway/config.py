@@ -15,7 +15,7 @@ class Settings:
     upstream_url: str = "http://127.0.0.1:8000"
     upstream_api_key: str | None = None  # matches the model server's --api-key, if set
     # Admission control: requests running against the model server, and requests allowed to wait.
-    max_inflight: int = 8
+    max_inflight: int = 16  # vLLM's --max-num-seqs; Exp 1 on vLLM put the knee there (results/summary/EXP-01-concurrency.md)
     max_queue: int = 32
     queue_timeout_s: float = 10.0
     # Total deadline for one request, including queueing and streaming.

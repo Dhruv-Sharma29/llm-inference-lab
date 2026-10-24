@@ -1,6 +1,7 @@
 """Gateway behaviour against a real model server (llama.cpp or vLLM), not the mock.
 
     python scripts/real_upstream_checks.py --upstream http://127.0.0.1:21000 [--crash]
+    python scripts/real_upstream_checks.py --upstream http://127.0.0.1:21020 --out results/summary/real_upstream_checks_vllm.json
 
 Starts the gateway in front of the server and checks:
   basics        non-streaming and streaming requests succeed; exact token counting (model tokenizer)
@@ -36,15 +37,31 @@ GATEWAY_PORT = 21090
 INFLIGHT, QUEUE = 4, 4
 
 
-def predicted_tokens(upstream: str) -> int:
+def _metric(upstream: str, name: str) -> float | None:
     for line in httpx.get(f"{upstream}/metrics", timeout=5).text.splitlines():
-        if line.startswith("llamacpp:tokens_predicted_total"):
-            return int(float(line.split()[-1]))
-    raise RuntimeError("no llamacpp:tokens_predicted_total metric (is this llama.cpp?)")
+        if line.startswith(name):
+            return float(line.split()[-1])
+    return None
+
+
+def predicted_tokens(upstream: str) -> int:
+    """Tokens the server has generated so far: llama.cpp's or vLLM's counter."""
+    for name in ("llamacpp:tokens_predicted_total", "vllm:generation_tokens_total"):
+        v = _metric(upstream, name)
+        if v is not None:
+            return int(v)
+    raise RuntimeError("no generated-token counter (llama.cpp or vLLM) at /metrics")
 
 
 def slots_busy(upstream: str) -> int:
-    return sum(1 for s in httpx.get(f"{upstream}/slots", timeout=5).json() if s.get("is_processing"))
+    """Requests the server is generating for: llama.cpp's busy slots, or vLLM's running requests."""
+    r = httpx.get(f"{upstream}/slots", timeout=5)
+    if r.status_code == 200:
+        return sum(1 for s in r.json() if s.get("is_processing"))
+    running = _metric(upstream, "vllm:num_requests_running")
+    if running is None:
+        raise RuntimeError("neither /slots (llama.cpp) nor vllm:num_requests_running")
+    return int(running)
 
 
 def start_gateway(upstream: str) -> subprocess.Popen:
@@ -171,6 +188,7 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--upstream", default="http://127.0.0.1:21000")
     p.add_argument("--crash", action="store_true", help="also SIGKILL the llama.cpp server mid-stream (it is restarted)")
+    p.add_argument("--out", default="results/summary/real_upstream_checks.json")
     args = p.parse_args()
     (ROOT / ".run").mkdir(exist_ok=True)
     gw_proc = start_gateway(args.upstream)
@@ -189,7 +207,7 @@ def main() -> None:
             print("crash", json.dumps(report["crash"]), flush=True)
     finally:
         gw_proc.terminate()
-    out = ROOT / "results/summary/real_upstream_checks.json"
+    out = ROOT / args.out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=1))
 
