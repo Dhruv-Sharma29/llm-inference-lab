@@ -9,7 +9,8 @@ up actually stops the model from generating.
 > **Status:** the gateway and benchmark tooling are complete and tested against a mock model
 > server (32 tests). The real model server (vLLM, NVIDIA's DGX Spark image) runs on the GX10 host,
 > because the development environment is an unprivileged container that can't run Docker. The
-> host step is scripted in [RUNBOOK.md](RUNBOOK.md) § 1 but not yet run. Meanwhile a
+> container step is scripted in [RUNBOOK.md](RUNBOOK.md) § 1 but not run; **vLLM also installs with pip, and
+> that path serves the pinned model on the GB10 (RUNBOOK § 1a)**. A
 > llama.cpp stopgap serves the same pinned model from inside the dev container
 > (`scripts/llamacpp_setup.sh`, `scripts/llamacpp_serve.sh`; details in env/ENVIRONMENT.md).
 > **Baseline (2026-10-23, llama.cpp stopgap, GPU otherwise idle):** 1,800 requests, 0 errors;
@@ -140,7 +141,7 @@ API keys, per-key quota.
 
 ## Next steps
 
-- **M1:** serve one model from the vLLM recipe pinned by image digest, and reproduce the setup from the README.
+- **vLLM container:** the image-digest path on a host with Docker (RUNBOOK § 1); the native path is done.
 - **M4:** the remaining experiments (batching, prefix caching); find where throughput steps
   between concurrency 16 and 32 (EXP-01).
 

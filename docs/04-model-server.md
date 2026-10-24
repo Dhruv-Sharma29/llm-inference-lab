@@ -11,7 +11,7 @@ The development environment is itself a Docker container on the GX10, and it is 
 `CAP_SYS_ADMIN`, cgroup2 is read-only, and there is no host Docker socket. A Docker daemon cannot
 run inside it, so the planned vLLM container has to run **on the host**, and the gateway reaches
 it over the Docker bridge (`172.17.0.1`). No one with host access has run that step yet, so the
-vLLM path is blocked (PLAN M0/M1).
+vLLM *container* path is blocked (PLAN M0/M1); since 2026-10-24 vLLM also runs natively, installed with pip ([m1-vllm-native](../results/summary/m1-vllm-native.md)).
 
 A llama.cpp server built inside the container is the stopgap. It needs no privileges, it serves
 the same pinned model revision, and the gateway in front of it is identical.
@@ -31,7 +31,7 @@ the same pinned model revision, and the gateway in front of it is identical.
 | Prefix caching | off for the baseline (`--no-enable-prefix-caching`), on in Exp 4 | not configured in the script. **[verify]** the llama.cpp default |
 | Tool calls | `--enable-auto-tool-choice --tool-call-parser hermes` | `--jinja` (the model's own chat template) |
 | Server-side metrics | vLLM `/metrics` | `--metrics` (Prometheus) and `--slots` (`/slots`) |
-| Status | scripted, **never run** | running, and used by the companion projects through the gateway (README) |
+| Status | container: scripted, never run; **native pip install: running** (2026-10-24) | running, and used by the companion projects through the gateway (README) |
 
 The stopgap was chosen to keep the M3 checks unblocked. It is a different server running
 quantised weights, so its numbers are **not** a preview of the vLLM baseline. M2 and M4 are

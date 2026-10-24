@@ -3,22 +3,39 @@
 Everything in [start.md](start.md) runs on CPU against the mock. This file covers the rest: the
 steps that need the GX10 host, Docker, the GPU, or a model on disk. They are listed in order, each
 with what it unblocks. Status as of 2026-10-23: § 2–4 have been run on the stopgap (2026-10-07).
-**§ 1 and § 5 have never been run.**
+**§ 1's container path has never been run (it needs Docker on the host); § 1a, the native vLLM
+path, closes M1 without it (2026-10-24).**
 
 | § | Step | Needs | Status |
 |---|---|---|---|
-| 1 | Serve the model on the host with vLLM | host shell, Docker + NVIDIA Container Toolkit | scripted, not run |
+| 1 | Serve the model on the host with vLLM (container) | host shell, Docker + NVIDIA Container Toolkit | scripted, not run |
+| 1a | Serve the model with vLLM installed by pip, no Docker | GPU, the cached model, network for the install | done 2026-10-24, `results/summary/m1-vllm-native.md` |
 | 2 | Serve the stopgap with llama.cpp in the dev container | GPU, the cached model, network for the clone | running |
-| 3 | Put the gateway in front of a real model | § 1 or § 2 | done on § 2 |
-| 4 | Behaviour checks against the real server | § 2 (the script is llama.cpp-specific) | done, `results/summary/real_upstream_checks.json` |
-| 5 | Baseline benchmark | § 1, a quiet GPU window | not run |
+| 3 | Put the gateway in front of a real model | § 1, 1a or 2 | done on § 1a and § 2 |
+| 4 | Behaviour checks against the real server | § 1a or § 2 | done on both, `results/summary/real_upstream_checks.json` (llama.cpp), `…_vllm.json` |
+| 5 | Baseline benchmark | a server, a quiet GPU window | done on § 2 (2026-10-23) and § 1a (2026-10-24), [EXP-01](results/summary/EXP-01-concurrency.md) |
 
 **Before any GPU step on the shared machine:** run `nvidia-smi` and `free -g`, and write the
 result down. Other users' jobs share the GPU and the unified memory (`env/ENVIRONMENT.md`).
 
 ---
 
-## 1. Serving the model on the host (vLLM) — closes M1
+## 1a. vLLM without Docker — closes M1
+
+```bash
+scripts/vllm_native_setup.sh          # pip install of vllm==0.32.0 (torch 2.13.0+cu130) into .tools/vllm-venv
+scripts/vllm_native_serve.sh start    # model and limits from env/serve.env, on 127.0.0.1:21020 (VLLM_PORT)
+curl -s http://127.0.0.1:21020/v1/chat/completions -H 'Content-Type: application/json' \
+  -d @results/raw/20261024-vllm-native-first-request.json
+scripts/vllm_native_serve.sh stop
+```
+
+Cold start about 3 minutes (weights 85 s, profiling and warm-up 75 s); 28.6 GB of GPU memory at
+`GPU_MEMORY_UTILIZATION=0.25`. Needs a driver that supports CUDA 13 (580 here). Then the gateway
+(§ 3 with `GATEWAY_UPSTREAM_URL=http://127.0.0.1:21020`) and the checks (§ 4 with `--upstream
+http://127.0.0.1:21020 --out results/summary/real_upstream_checks_vllm.json`).
+
+## 1. Serving the model on the host (vLLM container)
 
 The development environment for this project is itself a Docker container on the GX10, and it is
 **unprivileged**: Docker's default capability set (no `CAP_SYS_ADMIN`), a read-only cgroup

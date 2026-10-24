@@ -60,7 +60,7 @@ run of its cmake line into a scratch directory gives the same `CMAKE_CUDA_ARCHIT
 `CMakeCache.txt`. Then a clean rebuild (2026-10-23) from the script's cmake line into an empty scratch directory built
 `llama-server` at the same commit (`6753a03`); `--list-devices` shows `CUDA0: NVIDIA GB10`, and with
 every layer offloaded (`-ngl 99`) it answered a request correctly ("What is 17 + 25?" → `42`) with no
-"no kernel image" error. That closes S6 for the llama.cpp stopgap; the vLLM path is
+"no kernel image" error. That closes S6 for the llama.cpp stopgap; the vLLM path was
 still not run.
 
 ### 6. The GGUF converter imports sentencepiece for a BPE model
@@ -151,14 +151,21 @@ The design record lists this from the start ([01](01-architecture.md) § Known l
 Disconnects are watched only while a request is queued and while it is streaming. It is
 acceptable for the benchmark, which always streams.
 
+### 17. vLLM installed with pip instead of the container (2026-10-24)
+
+PLAN M1 assumed NVIDIA's vLLM container, and the dev environment can't run Docker. vLLM 0.32.0
+also ships as a pip wheel for aarch64 with torch 2.13.0+cu130, whose `sm_120` kernels run on the
+GB10 (`sm_121`) under the 580 driver. `scripts/vllm_native_setup.sh` and `vllm_native_serve.sh`
+pin the version and read the model and limits from `env/serve.env`. What this gives up: the
+container's pinned image digest (replaced by a pinned package version and a lockable venv) and
+NVIDIA's tested GB10 build. Reproducing it from scratch caught a pid-file race in the first serve
+script, now fixed.
+
 ## Deferred, not dropped
 
 | Item | Waits on | Where tracked |
 |---|---|---|
-| vLLM on the host, image digest, vLLM version | someone with host access | [RUNBOOK.md](../RUNBOOK.md) § 1, PLAN M1 |
 | vLLM aborts the sequence on disconnect | vLLM running | PLAN M3 |
-| Baseline benchmark | M1, a quiet GPU window, a fixed protocol | PLAN M2, [05](05-evaluation.md) § Protocol |
-| `GATEWAY_TOKENIZER_FILE` in `serve.env` | M1 | `env/serve.env` (`TBD`) |
 | Prometheus scrape config + Grafana | a baseline worth watching | PLAN layout `monitoring/` |
 | Exps 1–5 | the baseline | PLAN M4 |
 | Router | M1–M4 | PLAN M5 (optional) |

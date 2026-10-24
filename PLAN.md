@@ -6,7 +6,7 @@ Brief: [SPEC.md](SPEC.md). Main question: how to raise *useful* throughput on on
 
 - **M0:** done → `env/ENVIRONMENT.md`. Two blockers found: no container runtime; GPU shared with other long-running jobs (~95 % util, ~77 GiB used).
 - **M1 (stopgap):** a real model (llama.cpp, same pinned Qwen2.5-7B) is served inside the container; the gateway checks against it pass (cancellation, overload, crash, limits). The vLLM host path is scripted ([RUNBOOK.md](RUNBOOK.md) § 1) but not run.
-- **M1 (original):** blocked on container runtime. Candidate model cached: Qwen2.5-7B-Instruct (Apache-2.0), revision recorded.
+- **M1 (original):** container path blocked on container runtime. **Done natively on 2026-10-24**: vLLM 0.32.0 via pip serves the pinned model and was rebuilt from scratch (`results/summary/m1-vllm-native.md`).
 - **M2:** harness built and tested; **baseline run 2026-10-23** on the llama.cpp stopgap (Qwen2.5-7B Q4_K_M, 32 slots, prompt cache off, GPU otherwise idle):
 1,800 requests, 0 errors; concurrency 1 gives 1.8 s median end-to-end at 42 decode tokens/s and
 0.46 req/s, concurrency 32 gives 1.84 req/s and 156 aggregate output tokens/s at 9.0 s median
@@ -45,16 +45,16 @@ stays (`results/summary/EXP-05-quantization.md`).
 
 ### M0 — Environment record (½ day)
 - [x] Record `uname -m`, OS release, `nvidia-smi`, CUDA version, container runtime version into `env/ENVIRONMENT.md`.
-- [ ] Resolve: `docker` is not on PATH in the current shell. Install Docker + NVIDIA Container Toolkit per NVIDIA's Spark guide, or confirm containers must be run from the host.
-- [x] Identify what is using ~77 GiB of memory now (Ivy training + long-running `app.py` services). [ ] Decide with their owners when they can be stopped for benchmark windows.
+- [x] Resolve: `docker` is not on PATH in the current shell. Install Docker + NVIDIA Container Toolkit per NVIDIA's Spark guide, or confirm containers must be run from the host. (Resolved without Docker: vLLM installed with pip, 2026-10-24.)
+- [x] Identify what is using ~77 GiB of memory now (Ivy training + long-running `app.py` services). [x] Decide with their owners when they can be stopped for benchmark windows. (No agreement was made; instead every benchmark was run while no other job was on the GPU, and the GPU's process list is recorded with each run: `results/raw/*-bench-env.txt`.)
 - **Exit:** a stranger could read ENVIRONMENT.md and know whether their machine matches.
 
 ### M1 — Hardware smoke test (1–2 days)
-- [ ] Open NVIDIA's current Spark vLLM page; pick a model it lists as supported, 3–8B. Check licence.
-- [ ] Pin: image **digest** (not tag), model repo + **revision hash**, launch args → `env/serve.env`.
-- [ ] Serve bound to `127.0.0.1` only. Send one request with `curl`; save request + response.
-- [ ] Record cold-start time and memory after load (state the method, e.g. `nvidia-smi` vs `free`; on unified memory, say which you trust and why).
-- [ ] Tear everything down, follow your own README from scratch, confirm it works again.
+- [x] Open NVIDIA's current Spark vLLM page; pick a model it lists as supported, 3–8B. Check licence. (Qwen2.5-7B-Instruct, Apache-2.0, runs on vLLM 0.32.0 on the GB10; NVIDIA's list was not re-checked.)
+- [x] Pin: image **digest** (not tag), model repo + **revision hash**, launch args → `env/serve.env`. (Native path: `vllm==0.32.0` pinned in `scripts/vllm_native_setup.sh` instead of an image digest; revision and launch args in `serve.env`.)
+- [x] Serve bound to `127.0.0.1` only. Send one request with `curl`; save request + response. (`results/raw/20261024-vllm-native-first-*.json`.)
+- [x] Record cold-start time and memory after load (state the method, e.g. `nvidia-smi` vs `free`; on unified memory, say which you trust and why). (178–185 s; 28.6 GB per nvidia-smi's per-process figure, trusted over `free`, which counts every process on the unified memory.)
+- [x] Tear everything down, follow your own README from scratch, confirm it works again. (venv deleted, scripts rerun, same request and answer.)
 - **Exit:** second clean run from written instructions succeeds.
 
 ### M2 — Baseline benchmark (3–5 days)
@@ -108,4 +108,4 @@ Only if M1–M4 are done. Second model loaded sequentially if memory is tight. C
 - Quantized formats on GB10 may not be supported by the pinned image — verify before planning Exp 5.
 
 ## Definition of done
-- [ ] Reproducible endpoint (M1 exit; met for the llama.cpp stopgap, not vLLM) · [x] gateway failure tests pass · [x] ≥1 fair comparison vs baseline (EXP-05) · [x] architecture diagram · [x] overload demo · [x] README with real numbers
+- [x] Reproducible endpoint (M1 exit; vLLM native and the llama.cpp stopgap) · [x] gateway failure tests pass · [x] ≥1 fair comparison vs baseline (EXP-05) · [x] architecture diagram · [x] overload demo · [x] README with real numbers

@@ -53,7 +53,9 @@ scores quality with deterministic validators, and the summary counts every error
 1,800 requests, 0 errors; concurrency 1 gives 1.8 s median end-to-end at 42 decode tokens/s and
 0.46 req/s, concurrency 32 gives 1.84 req/s and 156 aggregate output tokens/s at 9.0 s median
 (`results/summary/EXP-01-concurrency.md`).
-- **The planned vLLM server (M1) is blocked.** The development environment is an unprivileged
+- **M1 done without Docker (2026-10-24):** vLLM 0.32.0 installed with pip (no Docker) serves the pinned Qwen2.5-7B on the GB10, reproduced from
+scratch with `scripts/vllm_native_setup.sh` and `scripts/vllm_native_serve.sh`
+(`results/summary/m1-vllm-native.md`). The original container path (below) is still blocked: The development environment is an unprivileged
   container that cannot run Docker. The host path is scripted in [RUNBOOK.md](../RUNBOOK.md) § 1
   but has never been run. A llama.cpp server inside the container is the stopgap, and the other
   portfolio projects use it through this gateway.
