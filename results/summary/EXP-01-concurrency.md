@@ -36,3 +36,29 @@ higher throughput, similar p50, similar or lower p95) and, by `max_inflight × q
 service_time` = 32 × 10 / 9 ≈ 35, `GATEWAY_MAX_QUEUE=32` with the 10 s queue timeout. For
 interactive latency (p50 under 2 s), cap at 1–2 in flight and accept ~0.46 req/s. The code
 defaults stay as they are: they target the planned vLLM server (16 sequences).
+
+## On vLLM (2026-10-24)
+
+Same harness and protocol against natively installed vLLM 0.32.0 (`results/summary/m1-vllm-native.md`):
+bf16 weights (not quantised), 16 sequences, 8,192 context, prefix caching off, 0.25 of GPU memory;
+the GPU otherwise idle (`results/raw/20261024T024142Z-vllm-bench-env.txt`). 1,800 requests, 0 errors
+(`results/raw/20261024T024152Z-baseline-vllm.jsonl` → `results/summary/baseline-vllm.md`); held-out
+quality 60/60 (`heldout-vllm.md`).
+
+| Concurrency | e2e p50 / p95 (s) | TTFT p50 / p95 (ms) | Decode tok/s per request | Aggregate output tok/s | OK req/s | Quality |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 4.87 / 15.32 | 154 / 369 | 13.4 | 13.0 | 0.15 | 0.95 |
+| 2 | 4.15 / 12.87 | 214 / 431 | 16.3 | 30.5 | 0.36 | 0.95 |
+| 4 | 4.23 / 13.14 | 203 / 432 | 16.1 | 58.7 | 0.70 | 0.95 |
+| 8 | 4.43 / 13.89 | 207 / 465 | 15.2 | 105.5 | 1.26 | 0.95 |
+| 16 | 5.00 / 15.55 | 345 / 723 | 13.8 | 176.2 | 2.10 | 0.95 |
+| 32 | 11.15 / 21.45 | 6,445 / 9,038 | 13.7 | 176.1 | 2.10 | 0.95 |
+
+**Explanation.** vLLM's continuous batching keeps per-request latency almost flat up to its 16
+sequences while throughput rises 14x; at 32 the extra 16 wait inside vLLM (TTFT 6.4 s) for no gain.
+One request at a time it is slower than llama.cpp because it serves bf16 weights, about 4x the bytes
+per token of Q4_K_M; the two servers differ in engine *and* precision, so this is not a one-factor
+comparison between them.
+
+**Decision for vLLM (keep).** `GATEWAY_MAX_INFLIGHT=16` = `--max-num-seqs` (now the code default and
+in `env/serve.env`); queue 16 × 10 / 5 ≈ 32, which is the existing `GATEWAY_MAX_QUEUE=32`.

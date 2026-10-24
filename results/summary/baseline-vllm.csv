@@ -1,0 +1,7 @@
+run_id,label,concurrency,requests,ok,errors,error_types,e2e_p50_ms,e2e_p95_ms,ttft_p50_ms,ttft_p95_ms,decode_tok_s_p50,agg_out_tok_s,ok_req_s,quality_of_ok,quality_of_all,mem_peak_gib
+20261024T024152Z-baseline-vllm,baseline-vllm,1,300,300,0,,4872.5,15324.3,153.5,369.3,13.4,13.0,0.15,0.95,0.95,40.55
+20261024T024152Z-baseline-vllm,baseline-vllm,2,300,300,0,,4150.4,12866.5,214.4,430.7,16.3,30.5,0.36,0.95,0.95,40.71
+20261024T024152Z-baseline-vllm,baseline-vllm,4,300,300,0,,4229.1,13137.6,202.6,431.6,16.1,58.7,0.7,0.95,0.95,40.71
+20261024T024152Z-baseline-vllm,baseline-vllm,8,300,300,0,,4427.3,13888.5,207.4,464.6,15.2,105.5,1.26,0.95,0.95,40.69
+20261024T024152Z-baseline-vllm,baseline-vllm,16,300,300,0,,5003.9,15552.8,344.9,722.5,13.8,176.2,2.1,0.95,0.95,40.71
+20261024T024152Z-baseline-vllm,baseline-vllm,32,300,300,0,,11154.2,21450.1,6445.4,9037.8,13.7,176.1,2.1,0.95,0.95,40.7

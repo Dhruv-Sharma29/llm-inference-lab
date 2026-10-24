@@ -1,0 +1,44 @@
+{
+ "at": "2026-10-24T02:36:47.320576+00:00",
+ "upstream": "http://127.0.0.1:21020",
+ "gpu_utilisation_before": "0 %",
+ "basics": {
+  "non_stream_status": 200,
+  "non_stream_text": "OK",
+  "stream_status": 200,
+  "stream_ended_with_done": true
+ },
+ "oversized": {
+  "status": 413,
+  "error": "input_too_large",
+  "message": "Input is ~5009 tokens; the limit is 3500.",
+  "server_untouched": true
+ },
+ "cancellation": {
+  "chunks_read_before_disconnect": 10,
+  "slots_busy_while_streaming": 1,
+  "slot_idle_s_after_disconnect": 0.16,
+  "tokens_generated_total": 9,
+  "requested_max_tokens": 400,
+  "tokens_generated_in_3s_after_idle": 0,
+  "seconds_streamed": 0.7
+ },
+ "overload": {
+  "burst": 20,
+  "capacity": "4 in flight + 4 queued",
+  "peak": {
+   "inflight": 4,
+   "waiting": 4
+  },
+  "outcomes": {
+   "200 ok": {
+    "count": 8,
+    "max_s": 2.0
+   },
+   "429 queue_full": {
+    "count": 12,
+    "max_s": 0.01
+   }
+  }
+ }
+}

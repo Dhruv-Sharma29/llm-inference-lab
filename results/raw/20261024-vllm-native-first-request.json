@@ -1,0 +1,1 @@
+{"model":"qwen2.5-7b-instruct","messages":[{"role":"user","content":"What is 17 + 25? Reply with only the number."}],"temperature":0,"max_tokens":8}
